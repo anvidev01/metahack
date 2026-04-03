@@ -1,9 +1,8 @@
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 
 class Action(BaseModel):
-    action_type: str  
-    # "classify" | "call_tool" | "respond" | "escalate" | "resolve"
+    action_type: Literal["classify", "call_tool", "respond", "escalate", "resolve"]
     content: str
     tool_name: Optional[str] = None
     tool_params: Optional[dict] = None

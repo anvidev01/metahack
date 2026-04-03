@@ -118,12 +118,12 @@ def grade_policy_conflict_escalation(state):
         if "merge" in content or "escalate" in content:
             decision_made = True
             
-        if "50%" in content or "25%" in content or "refund" in content:
+        if "50%" in content and "25%" not in content:
             refund_computed = True
             
         if act.get("action_type") == "resolve":
             # Check fields
-            if "complaint" in content and ("escalate" in content or "merge" in content) and "refund" in content and "timeline" in content:
+            if "comp-9901" in content and ("escalate" in content or "merge" in content) and "50%" in content and ("14" in content or "days" in content):
                 plan_complete = True
                 
     if has_history and decision_made:

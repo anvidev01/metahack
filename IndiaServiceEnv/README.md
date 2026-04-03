@@ -13,6 +13,8 @@ tags:
 
 # IndiaServiceEnv
 
+IndiaServiceEnv was built by the solo founder of InBridge (inbridge.in), a live civic assistant helping Indian citizens navigate government schemes. The same users who struggle with PM-KISAN applications also struggle with IRCTC refunds and BESCOM billing disputes. This environment brings that real-world friction into a trainable RL setting for the first time.
+
 This is an **OpenEnv** wrapper environment engineered to simulate real-world Indian utility and telecom grievance resolution workflows. Customer service agents must address mock tickets (Jio, IRCTC, BESCOM), effectively utilize designated APIs to lookup or interpret records, and issue resolutions.
 
 ## Environment Space
@@ -46,7 +48,14 @@ At each step, agents receive the following 7 explicit state mapping components:
 - **`multi_turn_resolution`** (Difficulty: **Medium** | Max Steps: 6)
   Ask the user for their IRCTC details (PNR), execute the `check_refund_status` tool, interpret timeline logic iteratively, and formulate a responsive resolution sequence.
 - **`policy_conflict_escalation`** (Difficulty: **Hard** | Max Steps: 8)
-  Unpack deep conflicts. Call `check_complaint_history` to locate preexisting complaints, identify intersecting rules using `get_policy`, compute the customized 25% vs 50% refund dynamics over time constraints, and issue escalation explicitly.
+  Unpack deep conflicts. Call `check_complaint_history` to locate preexisting complaints, identify intersecting rules using `get_policy`, compute the customized 25% vs 50% refund dynamics over time constraints, and issue escalation explicitly. 
+  *Note: This task features a "hidden state" mechanic—the agent must discover the existing complaint via an explicit tool call as it is NOT shown in the initial observation context, enforcing genuine exploratory behaviors.*
+
+## Reward Design
+This environment features meticulously scaled intermediate rewards and strict behavioral penalties:
+- **Incremental Scaling**: Partial sub-scores exist to guide agents sequentially (e.g., getting +0.3 for correctly mapping API arguments instead of bounding uniquely to a binary ending win).
+- **Redundancy Penalty**: Models lose score density (`-0.1` per step) if they loop context or ask redundant questions, mimicking customer frustration.
+- **Hallucination Penalty**: Emitting false tool resolution data without technically triggering a tool maps to a fast scalar penalty trap (`-0.3`) locking off the maximum ceiling. This drastically penalizes stochastic or hallucinated reasoning paths.
 
 ## Setup & Running
 

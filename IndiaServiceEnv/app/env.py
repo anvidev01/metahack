@@ -158,7 +158,7 @@ class IndiaServiceEnv:
         
     def get_policy(self, policy_type: str) -> dict:
         return {
-            "refund_percentage": 50,
+            "policy": "If oldest_dispute_months > 2, eligible for 50% refund. Otherwise, eligible for 25% refund.",
             "timeline_days": 14
         }
         
