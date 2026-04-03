@@ -51,11 +51,12 @@ At each step, agents receive the following 7 explicit state mapping components:
   Unpack deep conflicts. Call `check_complaint_history` to locate preexisting complaints, identify intersecting rules using `get_policy`, compute the customized 25% vs 50% refund dynamics over time constraints, and issue escalation explicitly. 
   *Note: This task features a "hidden state" mechanic—the agent must discover the existing complaint via an explicit tool call as it is NOT shown in the initial observation context, enforcing genuine exploratory behaviors.*
 
-## Reward Design
-This environment features meticulously scaled intermediate rewards and strict behavioral penalties:
-- **Incremental Scaling**: Partial sub-scores exist to guide agents sequentially (e.g., getting +0.3 for correctly mapping API arguments instead of bounding uniquely to a binary ending win).
-- **Redundancy Penalty**: Models lose score density (`-0.1` per step) if they loop context or ask redundant questions, mimicking customer frustration.
-- **Hallucination Penalty**: Emitting false tool resolution data without technically triggering a tool maps to a fast scalar penalty trap (`-0.3`) locking off the maximum ceiling. This drastically penalizes stochastic or hallucinated reasoning paths.
+## Design Decisions
+This environment features deliberately engineered mechanics to train realistic exploration bounding:
+- **Hidden State / Exploration Requirement**: In the `policy_conflict_escalation` task, pre-existing complaints are *not* surfaced inside initial tickets. The agent must systematically discover hidden parameters using exploration functions (`check_complaint_history`), mirroring real CRM architecture.
+- **Incremental Partial Rewards**: Partial sub-scores exist to guide agents sequentially (e.g., getting +0.3 for mapping API context instead of receiving a binary win scalar), increasing sub-step signal density natively!
+- **Penalty Systems (Supervisor Escalation)**: Models lose score limits (`-0.1` per step) if they loop context or ask redundant questions, mimicking customer frustration. Crucially, a `-0.3` deduction penalty natively controls hallucinations, matching strict telecommunications compliance guidelines organically!
+- **Policy Conflict Parameters**: Intersecting rule policies explicitly enforce LLM mathematical derivations (such as comparing age variables mathematically against raw policy data), rather than permitting generic boolean extraction techniques!
 
 ## Setup & Running
 
