@@ -62,13 +62,23 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
         
         messages.append({"role": "user", "content": user_msg})
         
-        # LLM call
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-            max_tokens=500,
-            temperature=0.0
-        )
+        # LLM call with retry for rate limit
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=messages,
+                    max_tokens=500,
+                    temperature=0.0
+                )
+                break
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(15)
+                else:
+                    raise e
         
         raw = response.choices[0].message.content
         messages.append({"role": "assistant", "content": raw})
