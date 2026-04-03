@@ -12,6 +12,10 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 class IndiaServiceEnv:
     def __init__(self, task_id: str):
         self.task_id = task_id
+        self.task_config = TASKS_CONFIG.get(self.task_id, {})
+        self.max_steps = self.task_config.get("max_steps", 5)
+        self.available_tools = self.task_config.get("available_tools", [])
+
         self._state = {
             "task_id": self.task_id,
             "ticket": {},
@@ -21,7 +25,8 @@ class IndiaServiceEnv:
             "resolution": None,
             "current_step": 0,
             "score_breakdown": {},
-            "consecutive_invalid_actions": 0
+            "consecutive_invalid_actions": 0,
+            "max_steps": self.max_steps
         }
         
         # Load data gracefully so state() works before reset
@@ -33,9 +38,7 @@ class IndiaServiceEnv:
             
         self.task_tickets = [t for t in all_tickets if t.get("task_id") == self.task_id]
         
-        self.task_config = TASKS_CONFIG.get(self.task_id, {})
-        self.max_steps = self.task_config.get("max_steps", 5)
-        self.available_tools = self.task_config.get("available_tools", [])
+        # Max steps and tools already initialized above
         
     def reset(self) -> Observation:
         # 3. reset() must always return the same ticket for the same task_id
@@ -56,7 +59,8 @@ class IndiaServiceEnv:
             "resolution": None,
             "current_step": 0,
             "score_breakdown": {},
-            "consecutive_invalid_actions": 0
+            "consecutive_invalid_actions": 0,
+            "max_steps": self.max_steps
         }
         
         return self._get_observation()

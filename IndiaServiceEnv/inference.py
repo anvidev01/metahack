@@ -3,6 +3,8 @@ Baseline inference script for IndiaServiceEnv.
 Uses OpenAI client. Reads API_BASE_URL, MODEL_NAME, HF_TOKEN 
 from environment variables.
 """
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 import json

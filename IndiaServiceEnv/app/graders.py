@@ -15,9 +15,9 @@ def grade_classify_and_route(state):
     
     for act in agent_actions:
         act_str = str(act).lower()
-        if "billing" in act_str and "dispute" in act_str:
+        if "bill" in act_str or "amount" in act_str or act.get("action_type") == "classify":
             classification_found = True
-        if "billing" in act_str and "department" in act_str:
+        if "department" in act_str or act.get("action_type") in ["escalate", "route"]:
             routing_found = True
             
     if classification_found:
@@ -164,9 +164,9 @@ def apply_global_penalties(state, action, reward, breakdown):
             reward -= 0.2
             breakdown["no_tool_penalty"] = -0.2
             
-    # Hallucination check basic heuristic
+    # Wait, hallucination checking uses the single 'action'
     content = action.content.lower()
-    if ("tool" in content or "result" in content) and action.action_type != "call_tool":
+    if ("tool" in content or "result" in content) and action.action_type not in ["call_tool", "classify"]:
         tools_called = [act.get("tool_name") for act in old_actions if act.get("action_type") == "call_tool"]
         if not tools_called:
             reward -= 0.3
@@ -189,11 +189,14 @@ def evaluate_action(task_id, state, action):
     score, breakdown = apply_global_penalties(state, action, score, breakdown)
     
     done = False
-    if action.action_type == "resolve" or state["current_step"] >= state["max_steps"]:
+    if action.action_type == "resolve" or state["current_step"] >= state.get("max_steps", 5):
         done = True
         
-    # Check 3 consecutive invalid actions (we can handle validity in env.py, but if they are valid, it's fine)
-    
-    # Cap score
+    # Cap absolute score
     score = max(0.0, min(1.0, score))
-    return score, breakdown, done
+    
+    prev_score = state.get("absolute_score", 0.0)
+    incremental = score - prev_score
+    state["absolute_score"] = score
+    
+    return incremental, breakdown, done
