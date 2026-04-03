@@ -6,6 +6,9 @@ from environment variables.
 from dotenv import load_dotenv
 load_dotenv()
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import json
 import requests
