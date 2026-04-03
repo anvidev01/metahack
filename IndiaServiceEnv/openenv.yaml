@@ -1,0 +1,27 @@
+name: IndiaServiceEnv
+version: "1.0.0"
+description: >
+  OpenEnv environment simulating Indian utility and telecom customer
+  service grievance resolution. An AI agent must classify complaints,
+  call mock resolution tools, navigate policy conflicts, and produce
+  structured resolution plans.
+tags:
+  - openenv
+  - customer-service
+  - india
+  - real-world
+tasks:
+  - id: classify_and_route
+    difficulty: easy
+    max_steps: 3
+  - id: multi_turn_resolution
+    difficulty: medium
+    max_steps: 6
+  - id: policy_conflict_escalation
+    difficulty: hard
+    max_steps: 8
+api:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+reward_range: [0.0, 1.0]

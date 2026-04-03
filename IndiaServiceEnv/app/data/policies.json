@@ -1,0 +1,13 @@
+{
+  "policies": {
+    "refund_delay": {
+      "escalate_if_days_greater_than": 7,
+      "wait_if_days_less_than_or_equal_to": 7
+    },
+    "bescom_dispute": {
+      "months_greater_than": 2,
+      "old_refund_percentage": 50,
+      "new_refund_percentage": 25
+    }
+  }
+}

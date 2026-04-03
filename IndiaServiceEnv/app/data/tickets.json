@@ -1,0 +1,67 @@
+{
+  "tickets": [
+    {
+      "task_id": "classify_and_route",
+      "ticket_id": "TKT-JIO-001",
+      "account_id": "JIO-98765",
+      "customer_message": "Hi, my Jio postpaid bill for this month is 2500 rupees but my plan is only 499. This is clearly a wrong bill amount.",
+      "pnr": null
+    },
+    {
+      "task_id": "classify_and_route",
+      "ticket_id": "TKT-JIO-002",
+      "account_id": "JIO-98766",
+      "customer_message": "I received my Jio fiber bill and it includes setup charges which I already paid last month. Dispute this immediately.",
+      "pnr": null
+    },
+    {
+      "task_id": "classify_and_route",
+      "ticket_id": "TKT-JIO-003",
+      "account_id": "JIO-98767",
+      "customer_message": "Why is my Jio mobile bill so high? It says I used international roaming but I have not left India. Please check.",
+      "pnr": null
+    },
+    {
+      "task_id": "multi_turn_resolution",
+      "ticket_id": "TKT-IRCTC-001",
+      "account_id": "IRCTC-123",
+      "customer_message": "My train was cancelled due to fog last week. I still haven't received my refund. Help.",
+      "pnr": "1234567890"
+    },
+    {
+      "task_id": "multi_turn_resolution",
+      "ticket_id": "TKT-IRCTC-002",
+      "account_id": "IRCTC-124",
+      "customer_message": "I cancelled my Rajdhani ticket 3 days ago. Where is the refund?",
+      "pnr": "0987654321"
+    },
+    {
+      "task_id": "multi_turn_resolution",
+      "ticket_id": "TKT-IRCTC-003",
+      "account_id": "IRCTC-125",
+      "customer_message": "The Vande Bharat express was cancelled today. Will I get an automatic refund? Need details.",
+      "pnr": "1122334455"
+    },
+    {
+      "task_id": "policy_conflict_escalation",
+      "ticket_id": "TKT-BESCOM-001",
+      "account_id": "BESCOM-5551",
+      "customer_message": "My electricity bill is 10,000 rupees! The meter reading is completely wrong. I am not paying this.",
+      "pnr": null
+    },
+    {
+      "task_id": "policy_conflict_escalation",
+      "ticket_id": "TKT-BESCOM-002",
+      "account_id": "BESCOM-5552",
+      "customer_message": "There is a massive error in my BESCOM bill this month, the meter reader didn't even come to my house.",
+      "pnr": null
+    },
+    {
+      "task_id": "policy_conflict_escalation",
+      "ticket_id": "TKT-BESCOM-003",
+      "account_id": "BESCOM-5553",
+      "customer_message": "Disputing my new BESCOM bill. The reading says 500 units but my meter shows 200.",
+      "pnr": null
+    }
+  ]
+}
