@@ -23,7 +23,7 @@ app.add_middleware(
 active_env = None
 
 class ResetRequest(BaseModel):
-    task_id: str
+    task_id: str = "classify_and_route"
 
 @app.post("/reset", response_model=Observation)
 def reset_env(req: ResetRequest):
