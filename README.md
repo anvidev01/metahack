@@ -18,7 +18,7 @@ people around us struggle to get a Jio billing error corrected,
 chase an IRCTC refund for weeks, or dispute an electricity bill 
 with no clear path forward. This environment was built by Anvi 
 Singh, solo founder of InBridge (inbridge.in), together with 
-teammates Armaan Soni and Abhyuday Agnihotri, who brought the 
+teammates Abhishek Rai and Abhyuday Agnihotri, who brought the 
 same energy to this project that goes into building civic tech 
 that actually works for real people.
 
@@ -129,8 +129,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 7860
 ```text
 API_BASE_URL=https://api.groq.com/openai/v1
 MODEL_NAME=llama-3.3-70b-versatile
-HF_TOKEN=<groq_api_key_starting_with_gsk_>
-ENV_URL=http://localhost:7860  # Or point directly to HF URL
+ENV_URL=https://huggingface.co/spaces/dobie17/IndiaServiceEnv
 ```
 
 ## Live Model Baseline Scores
