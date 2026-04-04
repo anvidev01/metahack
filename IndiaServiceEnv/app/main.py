@@ -22,8 +22,10 @@ app.add_middleware(
 # To be robust, let's keep one instance per task_id or just one global active instance.
 active_env = None
 
+from typing import Optional
+
 class ResetRequest(BaseModel):
-    task_id: str = "classify_and_route"
+    task_id: Optional[str] = "classify_and_route"
 
 @app.post("/reset", response_model=Observation)
 def reset_env(req: ResetRequest):
