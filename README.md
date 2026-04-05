@@ -18,7 +18,7 @@ people around us struggle to get a Jio billing error corrected,
 chase an IRCTC refund for weeks, or dispute an electricity bill 
 with no clear path forward. This environment was built by Anvi 
 Singh, solo founder of InBridge (inbridge.in), together with 
-teammates Abhishek Rai and Abhyuday Agnihotri, who brought the 
+teammates Armaan Soni and Abhyuday Agnihotri, who brought the 
 same energy to this project that goes into building civic tech 
 that actually works for real people.
 
