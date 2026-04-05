@@ -7,7 +7,7 @@ name = "indiaserviceenv"
 version = "1.0.0"
 description = "India Service Environment for OpenEnv"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi",
     "uvicorn",
@@ -15,5 +15,12 @@ dependencies = [
     "openai",
     "requests",
     "pyyaml",
-    "python-dotenv"
+    "python-dotenv",
+    "openenv-core>=0.2.0"
 ]
+
+[project.scripts]
+server = "server.app:main"
+
+[tool.setuptools]
+packages = ["app", "server"]
