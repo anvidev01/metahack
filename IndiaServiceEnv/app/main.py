@@ -66,3 +66,7 @@ def get_tasks():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/")
+def read_root():
+    return {"message": "IndiaServiceEnv API is running. Use /reset, /step, /state to interact."}
