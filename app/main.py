@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 from pydantic import BaseModel
 
 from app.models import Action, Observation, Reward
@@ -23,7 +24,7 @@ app.add_middleware(
 active_env = None
 
 class ResetRequest(BaseModel):
-    task_id: str
+    task_id: Optional[str] = "classify_and_route"
 
 @app.post("/reset", response_model=Observation)
 def reset_env(req: ResetRequest):
