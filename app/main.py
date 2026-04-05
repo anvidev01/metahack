@@ -27,8 +27,10 @@ class ResetRequest(BaseModel):
     task_id: Optional[str] = "classify_and_route"
 
 @app.post("/reset", response_model=Observation)
-def reset_env(req: ResetRequest):
+def reset_env(req: Optional[ResetRequest] = None):
     global active_env
+    if req is None:
+        req = ResetRequest()
     if req.task_id not in TASKS_CONFIG:
         raise HTTPException(status_code=400, detail="Invalid task_id")
     
