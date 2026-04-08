@@ -154,7 +154,7 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
         if done:
             break
 
-    final_score = min(max(total_reward, 0.0), 1.0)
+    final_score = min(max(total_reward, 0.001), 0.999)
     log_end(
         success=final_score >= 0.1,
         steps=steps_taken,
