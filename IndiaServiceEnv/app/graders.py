@@ -193,7 +193,7 @@ def evaluate_action(task_id, state, action):
         done = True
         
     # Cap absolute score
-    score = max(0.0, min(1.0, score))
+    score = max(0.001, min(0.999, score))
     
     prev_score = state.get("absolute_score", 0.0)
     incremental = score - prev_score

@@ -78,8 +78,8 @@ def run_task(task_id: str) -> float:
         obs = reset_resp.json()
     except Exception as e:
         print(f"[DEBUG] Reset failed: {e}", flush=True)
-        log_end(False, 0, 0.0, [])
-        return 0.0
+        log_end(False, 0, 0.001, [])
+        return 0.001
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     done = False
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                 scores[task] = run_task(task)
             except Exception as e:
                 print(f"[DEBUG] Task {task} failed: {e}", flush=True)
-                scores[task] = 0.0
+                scores[task] = 0.001
     except Exception as e:
         print(f"[DEBUG] Fatal: {e}", flush=True)
     finally:
