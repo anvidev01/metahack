@@ -62,102 +62,106 @@ tool results."""
 # ── Task runner ───────────────────────────────────────────────────────────────
 
 def run_task(task_id: str) -> float:
-    rewards      = []
-    steps_taken  = 0
+    rewards = []
+    steps_taken = 0
     total_reward = 0.0
+    obs = {}
 
     log_start(task_id, "IndiaServiceEnv", MODEL_NAME)
 
     try:
-        # Reset environment
+        reset_resp = requests.post(
+            f"{ENV_URL}/reset",
+            json={"task_id": task_id},
+            timeout=30
+        )
+        obs = reset_resp.json()
+    except Exception as e:
+        print(f"[DEBUG] Reset failed: {e}", flush=True)
+        log_end(False, 0, 0.0, [])
+        return 0.0
+
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    done = False
+
+    for step_num in range(1, 11):
+        if done:
+            break
+
+        user_msg = f"""Ticket: {obs.get('customer_message', '')}
+History: {json.dumps(obs.get('conversation_history', []))}
+Available tools: {obs.get('available_tools', [])}
+Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
+
+        messages.append({"role": "user", "content": user_msg})
+
+        # LLM call — wrapped so it NEVER crashes
+        raw = None
         try:
-            obs = requests.post(
-                f"{ENV_URL}/reset",
-                json={"task_id": task_id},
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=messages,
+                max_tokens=500,
+                temperature=0.0
+            )
+            raw = response.choices[0].message.content
+        except Exception as e:
+            print(f"[DEBUG] LLM call failed: {e}", flush=True)
+            raw = '{"action_type":"resolve","content":"fallback","tool_name":null,"tool_params":null}'
+
+        messages.append({"role": "assistant", "content": raw})
+
+        # Parse action — wrapped so it NEVER crashes
+        try:
+            action = json.loads(raw)
+        except Exception:
+            action = {
+                "action_type": "respond",
+                "content": raw or "fallback",
+                "tool_name": None,
+                "tool_params": None
+            }
+
+        # Step environment — wrapped so it NEVER crashes
+        try:
+            result = requests.post(
+                f"{ENV_URL}/step",
+                json=action,
                 timeout=30
             ).json()
+            obs = result["observation"]
+            reward = float(result["reward"]["value"])
+            done = result["done"]
+            breakdown = result["reward"].get("breakdown", {})
         except Exception as e:
-            print(f"[DEBUG] Reset failed: {e}", flush=True)
-            return 0.0
+            print(f"[DEBUG] Step failed: {e}", flush=True)
+            reward = 0.0
+            done = True
+            breakdown = {}
 
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-        done = False
+        rewards.append(reward)
+        total_reward += reward
+        steps_taken = step_num
 
-        while not done and steps_taken < 10:
-            # Build user message from observation
-            user_msg = (
-                f"Ticket: {obs['customer_message']}\n"
-                f"History: {json.dumps(obs['conversation_history'])}\n"
-                f"Available tools: {obs['available_tools']}\n"
-                f"Step: {obs['current_step']}/{obs['max_steps']}"
-            )
-            messages.append({"role": "user", "content": user_msg})
+        log_step(
+            step=step_num,
+            action=action.get("action_type", "unknown"),
+            reward=reward,
+            done=done,
+            error=None
+        )
 
-            # LLM call – wrapped fully so it never crashes
-            raw = None
-            max_retries = 3
-            for attempt in range(max_retries):
-                try:
-                    response = client.chat.completions.create(
-                        model=MODEL_NAME,
-                        messages=messages,
-                        max_tokens=500,
-                        temperature=0.0
-                    )
-                    raw = response.choices[0].message.content
-                    break
-                except Exception as e:
-                    print(f"[DEBUG] LLM call failed (attempt {attempt+1}): {e}", flush=True)
-                    if "429" in str(e):
-                        time.sleep(15)
-                    else:
-                        break   # non-rate-limit error – use fallback immediately
+        if done:
+            break
 
-            if raw is None:
-                raw = '{"action_type":"resolve","content":"error fallback","tool_name":null,"tool_params":null}'
-
-            messages.append({"role": "assistant", "content": raw})
-
-            # Parse action
-            try:
-                action = json.loads(raw)
-            except Exception:
-                action = {"action_type": "respond", "content": raw,
-                          "tool_name": None, "tool_params": None}
-
-            # Step environment
-            try:
-                result = requests.post(
-                    f"{ENV_URL}/step",
-                    json=action,
-                    timeout=30
-                ).json()
-            except Exception as e:
-                print(f"[DEBUG] Step failed: {e}", flush=True)
-                break
-
-            obs         = result["observation"]
-            reward      = result["reward"]["value"]
-            done        = result["done"]
-
-            total_reward += reward
-            steps_taken  += 1
-            rewards.append(reward)
-
-            action_type = action.get("action_type", "respond")
-            error_val   = result.get("error", None)
-
-            log_step(steps_taken, action_type, reward, done, error=error_val)
-
-    except Exception as e:
-        print(f"[DEBUG] Task failed: {e}", flush=True)
-
-    finally:
-        score   = min(max(total_reward, 0.0), 1.0)
-        success = score >= 0.1
-        log_end(success, steps_taken, score, rewards)
-
-    return total_reward
+    final_score = min(max(total_reward, 0.0), 1.0)
+    log_end(
+        success=final_score >= 0.1,
+        steps=steps_taken,
+        score=final_score,
+        rewards=rewards
+    )
+    return final_score
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
@@ -166,11 +170,15 @@ if __name__ == "__main__":
     scores = {}
     try:
         for task in TASKS:
-            scores[task] = run_task(task)
+            try:
+                scores[task] = run_task(task)
+            except Exception as e:
+                print(f"[DEBUG] Task {task} failed: {e}", flush=True)
+                scores[task] = 0.0
     except Exception as e:
-        print(f"[DEBUG] Fatal error: {e}", flush=True)
+        print(f"[DEBUG] Fatal: {e}", flush=True)
     finally:
         print(json.dumps({
             "type": "SUMMARY",
-            "scores": scores if "scores" in dir() else {}
-        }), flush=True)
+            "scores": scores
+        }))
