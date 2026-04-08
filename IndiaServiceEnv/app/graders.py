@@ -21,14 +21,12 @@ def grade_classify_and_route(state):
             routing_found = True
             
     if classification_found:
-        breakdown["correct_classification"] = 0.5
-        score += 0.5
+        breakdown["correct_classification"] = 0.49
+        score += 0.49
     if routing_found:
         breakdown["correct_routing"] = 0.5
         score += 0.5
         
-    if score == 1.0:
-        return score, breakdown
     return score, breakdown
 
 def grade_multi_turn_resolution(state):
@@ -49,8 +47,8 @@ def grade_multi_turn_resolution(state):
         if act.get("action_type") == "respond" and "pnr" in act.get("content", "").lower():
             asked_pnr = True
     if asked_pnr:
-        breakdown["asked_for_pnr"] = 0.2
-        score += 0.2
+        breakdown["asked_for_pnr"] = 0.19
+        score += 0.19
         
     # check tool
     called_tool = False
@@ -101,8 +99,8 @@ def grade_policy_conflict_escalation(state):
             has_history = True
             
     if has_history:
-        breakdown["called_history_tool"] = 0.20
-        score += 0.20
+        breakdown["called_history_tool"] = 0.19
+        score += 0.19
         # If they called the tool, we assume they detected the complaint based on prompt requirements, 
         # but let's give points if they mentioned it:
         breakdown["detected_existing_complaint"] = 0.15

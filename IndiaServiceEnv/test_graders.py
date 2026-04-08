@@ -32,7 +32,7 @@ def test_classify_and_route_perfect():
         {"action_type": "resolve", "content": "Resolution.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("classify_and_route", seq)
-    assert score == 1.0, f"Expected 1.0, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected 0.99, got {score}"
 
 def test_classify_and_route_partial():
     seq = [
@@ -58,7 +58,7 @@ def test_multi_turn_perfect():
         {"action_type": "resolve", "content": "Resolved natively.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("multi_turn_resolution", seq)
-    assert score == 1.0, f"Expected 1.0, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected 0.99, got {score}"
 
 def test_multi_turn_partial():
     seq = [
@@ -81,7 +81,7 @@ def test_policy_escalation_perfect():
         {"action_type": "resolve", "content": "We will escalate this comp-9901 ticket. The refund is 50% and timeline is 14 days.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("policy_conflict_escalation", seq)
-    assert score == 1.0, f"Expected 1.0, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected 0.99, got {score}"
 
 def test_policy_escalation_partial():
     seq = [
