@@ -32,7 +32,7 @@ def log_end(success, steps, score, rewards):
 API_BASE_URL = os.environ.get("API_BASE_URL", "")
 MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o")
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
-ENV_URL = os.environ.get("ENV_URL", "http://localhost:7860")
+ENV_URL = os.environ.get("ENV_URL", "https://dobie17-indiaserviceenv.hf.space")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
@@ -80,8 +80,8 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
             
             # LLM call with retry for rate limit
             import time
-            max_retries = 3
-            for attempt in range(max_retries):
+            raw = None
+            for attempt in range(3):
                 try:
                     response = client.chat.completions.create(
                         model=MODEL_NAME,
@@ -89,14 +89,16 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
                         max_tokens=500,
                         temperature=0.0
                     )
+                    raw = response.choices[0].message.content
                     break
                 except Exception as e:
                     if "429" in str(e):
                         time.sleep(15)
                     else:
-                        pass
-            
-            raw = response.choices[0].message.content
+                        raw = '{"action_type":"resolve","content":"fallback","tool_name":null,"tool_params":null}'
+                        break
+            if raw is None:
+                raw = '{"action_type":"resolve","content":"fallback","tool_name":null,"tool_params":null}'
             messages.append({"role": "assistant", "content": raw})
             
             # Parse action
@@ -107,12 +109,15 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
                           "tool_name": None, "tool_params": None}
             
             # Step environment
-            result = requests.post(f"{ENV_URL}/step", 
-                                   json=action).json()
-            
-            obs = result["observation"]
-            reward = result["reward"]["value"]
-            done = result["done"]
+            try:
+                result = requests.post(f"{ENV_URL}/step", json=action, timeout=30).json()
+                obs = result["observation"]
+                reward = float(result["reward"]["value"])
+                done = result["done"]
+            except Exception as e:
+                print(f"[DEBUG] Step failed: {e}", flush=True)
+                reward = 0.0
+                done = True
             
             total_reward += reward
             step_num += 1
@@ -131,5 +136,11 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
     return total_reward
 
 if __name__ == "__main__":
+    scores = {}
     for task in TASKS:
-        run_task(task)
+        try:
+            scores[task] = run_task(task)
+        except Exception as e:
+            print(f"[DEBUG] Task {task} failed: {e}", flush=True)
+            scores[task] = 0.0
+    print(json.dumps({"type": "SUMMARY", "scores": scores}))
