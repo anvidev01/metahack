@@ -1,7 +1,7 @@
 import re
 
 def grade_classify_and_route(state):
-    score = 0.0
+    score = 0.001
     breakdown = {
         "correct_classification": 0.0,
         "correct_routing": 0.0
@@ -30,7 +30,7 @@ def grade_classify_and_route(state):
     return score, breakdown
 
 def grade_multi_turn_resolution(state):
-    score = 0.0
+    score = 0.001
     breakdown = {
         "asked_for_pnr": 0.0,
         "called_tool_correctly": 0.0,
@@ -82,7 +82,7 @@ def grade_multi_turn_resolution(state):
     return score, breakdown
 
 def grade_policy_conflict_escalation(state):
-    score = 0.0
+    score = 0.001
     breakdown = {
         "detected_existing_complaint": 0.0,
         "called_history_tool": 0.0,
