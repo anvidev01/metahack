@@ -10,6 +10,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import os
+import sys
 import json
 import time
 import requests
@@ -28,7 +29,7 @@ def log_step(step, action, reward, done, error=None):
 
 def log_end(success, steps, score, rewards):
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
           flush=True)
 
 # ── Environment variables with safe defaults ─────────────────────────────────
@@ -77,9 +78,9 @@ def run_task(task_id: str) -> float:
         )
         obs = reset_resp.json()
     except Exception as e:
-        print(f"[DEBUG] Reset failed: {e}", flush=True)
-        log_end(False, 0, 0.001, [])
-        return 0.001
+        print(f"[DEBUG] Reset failed: {e}", file=sys.stderr, flush=True)
+        log_end(False, 0, 0.01, [])
+        return 0.01
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     done = False
@@ -106,7 +107,7 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
             )
             raw = response.choices[0].message.content
         except Exception as e:
-            print(f"[DEBUG] LLM call failed: {e}", flush=True)
+            print(f"[DEBUG] LLM call failed: {e}", file=sys.stderr, flush=True)
             raw = '{"action_type":"resolve","content":"fallback","tool_name":null,"tool_params":null}'
 
         messages.append({"role": "assistant", "content": raw})
@@ -134,7 +135,7 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
             done = result["done"]
             breakdown = result["reward"].get("breakdown", {})
         except Exception as e:
-            print(f"[DEBUG] Step failed: {e}", flush=True)
+            print(f"[DEBUG] Step failed: {e}", file=sys.stderr, flush=True)
             reward = 0.0
             done = True
             breakdown = {}
@@ -154,7 +155,7 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
         if done:
             break
 
-    final_score = min(max(total_reward, 0.001), 0.999)
+    final_score = min(max(total_reward, 0.01), 0.99)
     log_end(
         success=final_score >= 0.1,
         steps=steps_taken,
@@ -173,12 +174,7 @@ if __name__ == "__main__":
             try:
                 scores[task] = run_task(task)
             except Exception as e:
-                print(f"[DEBUG] Task {task} failed: {e}", flush=True)
-                scores[task] = 0.001
+                print(f"[DEBUG] Task {task} failed: {e}", file=sys.stderr, flush=True)
+                scores[task] = 0.01
     except Exception as e:
-        print(f"[DEBUG] Fatal: {e}", flush=True)
-    finally:
-        print(json.dumps({
-            "type": "SUMMARY",
-            "scores": scores
-        }))
+        print(f"[DEBUG] Fatal: {e}", file=sys.stderr, flush=True)
