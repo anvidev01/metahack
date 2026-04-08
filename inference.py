@@ -94,7 +94,7 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
                     if "429" in str(e):
                         time.sleep(15)
                     else:
-                        raise e
+                        pass
             
             raw = response.choices[0].message.content
             messages.append({"role": "assistant", "content": raw})
