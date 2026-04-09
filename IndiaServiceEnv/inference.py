@@ -16,10 +16,19 @@ import os
 import sys
 import json
 import time
-import requests
+import urllib.request
 from openai import OpenAI
 
-# ── Logging helpers ──────────────────────────────────────────────────────────
+# ── Helper ───────────────────────────────────────────────────────────────────
+
+def post_json(url, data, timeout=30):
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode('utf-8'),
+        headers={'Content-Type': 'application/json'}
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 def log_start(task, env, model):
     print(f"[START] task={task} env={env} model={model}", flush=True)
@@ -75,12 +84,7 @@ def run_task(task_id: str) -> float:
     log_start(task_id, "IndiaServiceEnv", MODEL_NAME)
 
     try:
-        reset_resp = requests.post(
-            f"{ENV_URL}/reset",
-            json={"task_id": task_id},
-            timeout=30
-        )
-        obs = reset_resp.json()
+        obs = post_json(f"{ENV_URL}/reset", {"task_id": task_id}, timeout=30)
     except Exception as e:
         print(f"[DEBUG] Reset failed: {e}", file=sys.stderr, flush=True)
         log_end(False, 0, 0.01, [])
@@ -129,11 +133,7 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
 
         # Step environment — wrapped so it NEVER crashes
         try:
-            result = requests.post(
-                f"{ENV_URL}/step",
-                json=action,
-                timeout=30
-            ).json()
+            result = post_json(f"{ENV_URL}/step", action, timeout=30)
             obs = result["observation"]
             reward = float(result["reward"]["value"])  # absolute score from server
             done = result["done"]

@@ -14,8 +14,17 @@ warnings.filterwarnings("ignore")
 
 import os
 import json
-import requests
+import urllib.request
 from openai import OpenAI
+
+def post_json(url, data, timeout=30):
+    req = urllib.request.Request(
+        url, 
+        data=json.dumps(data).encode('utf-8'), 
+        headers={'Content-Type': 'application/json'}
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 def log_start(task, env, model):
     print(f"[START] task={task} env={env} model={model}", 
@@ -70,8 +79,7 @@ def run_task(task_id: str) -> float:
     
     try:
         # Reset environment
-        obs = requests.post(f"{ENV_URL}/reset", 
-                            json={"task_id": task_id}).json()
+        obs = post_json(f"{ENV_URL}/reset", {"task_id": task_id}, timeout=30)
         
         while not done and step_num < 10:
             # Build user message from observation
@@ -114,7 +122,7 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
             
             # Step environment
             try:
-                result = requests.post(f"{ENV_URL}/step", json=action, timeout=30).json()
+                result = post_json(f"{ENV_URL}/step", action, timeout=30)
                 obs = result["observation"]
                 reward = float(result["reward"]["value"])
                 done = result["done"]
