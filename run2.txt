@@ -1,0 +1,23 @@
+[START] task=classify_and_route env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[STEP] step=1 action=respond reward=0.50 done=false error=null
+[STEP] step=2 action=call_tool reward=0.00 done=false error=null
+[STEP] step=3 action=escalate reward=0.50 done=true error=null
+[END] success=true steps=3 score=1.000 rewards=0.50,0.00,0.50
+[START] task=multi_turn_resolution env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[STEP] step=1 action=call_tool reward=0.30 done=false error=null
+[STEP] step=2 action=respond reward=0.20 done=false error=null
+[STEP] step=3 action=respond reward=0.30 done=false error=null
+[STEP] step=4 action=escalate reward=0.00 done=false error=null
+[STEP] step=5 action=respond reward=0.00 done=false error=null
+[STEP] step=6 action=resolve reward=0.00 done=true error=null
+[END] success=true steps=6 score=0.800 rewards=0.30,0.20,0.30,0.00,0.00,0.00
+[START] task=policy_conflict_escalation env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[STEP] step=1 action=respond reward=0.00 done=false error=null
+[STEP] step=2 action=call_tool reward=0.35 done=false error=null
+[STEP] step=3 action=call_tool reward=0.00 done=false error=null
+[STEP] step=4 action=respond reward=0.40 done=false error=null
+[STEP] step=5 action=respond reward=0.00 done=false error=null
+[STEP] step=6 action=respond reward=0.00 done=false error=null
+[STEP] step=7 action=respond reward=0.00 done=false error=null
+[STEP] step=8 action=escalate reward=0.00 done=true error=null
+[END] success=true steps=8 score=0.750 rewards=0.00,0.35,0.00,0.40,0.00,0.00,0.00,0.00

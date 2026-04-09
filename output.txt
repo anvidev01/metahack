@@ -1,0 +1,10 @@
+[START] task=classify_and_route env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[END] success=false steps=0 score=0.000 rewards=
+[DEBUG] Task classify_and_route failed: HTTPConnectionPool(host='localhost', port=7860): Max retries exceeded with url: /reset (Caused by NewConnectionError("HTTPConnection(host='localhost', port=7860): Failed to establish a new connection: [Errno 61] Connection refused"))
+[START] task=multi_turn_resolution env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[END] success=false steps=0 score=0.000 rewards=
+[DEBUG] Task multi_turn_resolution failed: HTTPConnectionPool(host='localhost', port=7860): Max retries exceeded with url: /reset (Caused by NewConnectionError("HTTPConnection(host='localhost', port=7860): Failed to establish a new connection: [Errno 61] Connection refused"))
+[START] task=policy_conflict_escalation env=IndiaServiceEnv model=llama-3.3-70b-versatile
+[END] success=false steps=0 score=0.000 rewards=
+[DEBUG] Task policy_conflict_escalation failed: HTTPConnectionPool(host='localhost', port=7860): Max retries exceeded with url: /reset (Caused by NewConnectionError("HTTPConnection(host='localhost', port=7860): Failed to establish a new connection: [Errno 61] Connection refused"))
+{"type": "SUMMARY", "scores": {"classify_and_route": 0.0, "multi_turn_resolution": 0.0, "policy_conflict_escalation": 0.0}}
