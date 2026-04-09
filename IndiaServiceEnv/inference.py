@@ -39,7 +39,8 @@ def log_end(success, steps, score, rewards):
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME",   "llama-3.3-70b-versatile")
-HF_TOKEN     = os.getenv("HF_TOKEN",     "")
+HF_TOKEN     = os.getenv("HF_TOKEN")
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 ENV_URL      = os.getenv("ENV_URL",      "https://dobie17-indiaserviceenv.hf.space")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
