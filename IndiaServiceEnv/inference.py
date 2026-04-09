@@ -17,7 +17,6 @@ import sys
 import json
 import time
 import urllib.request
-from openai import OpenAI
 
 # ── Helper ───────────────────────────────────────────────────────────────────
 
@@ -48,11 +47,9 @@ def log_end(success, steps, score, rewards):
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME",   "llama-3.3-70b-versatile")
-HF_TOKEN     = os.getenv("HF_TOKEN")
+HF_TOKEN     = os.getenv("HF_TOKEN", "")
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 ENV_URL      = os.getenv("ENV_URL",      "https://dobie17-indiaserviceenv.hf.space")
-
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 TASKS = ["classify_and_route", "multi_turn_resolution", "policy_conflict_escalation"]
 
@@ -107,13 +104,25 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
         # LLM call — wrapped so it NEVER crashes
         raw = None
         try:
-            response = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=messages,
-                max_tokens=500,
-                temperature=0.0
+            req_data = {
+                "model": MODEL_NAME,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.0
+            }
+            req_url = f"{API_BASE_URL.rstrip('/')}/chat/completions"
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f"Bearer {HF_TOKEN}"
+            }
+            req = urllib.request.Request(
+                req_url,
+                data=json.dumps(req_data).encode('utf-8'),
+                headers=headers
             )
-            raw = response.choices[0].message.content
+            with urllib.request.urlopen(req, timeout=30) as response:
+                resp_json = json.loads(response.read().decode('utf-8'))
+                raw = resp_json['choices'][0]['message']['content']
         except Exception as e:
             print(f"[DEBUG] LLM call failed: {e}", file=sys.stderr, flush=True)
             raw = '{"action_type":"resolve","content":"fallback","tool_name":null,"tool_params":null}'

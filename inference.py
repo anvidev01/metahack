@@ -15,7 +15,6 @@ warnings.filterwarnings("ignore")
 import os
 import json
 import urllib.request
-from openai import OpenAI
 
 def post_json(url, data, timeout=30):
     req = urllib.request.Request(
@@ -43,11 +42,9 @@ def log_end(success, steps, score, rewards):
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.3-70b-versatile")
-HF_TOKEN = os.getenv("HF_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 ENV_URL = os.getenv("ENV_URL", "https://dobie17-indiaserviceenv.hf.space")
-
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 TASKS = ["classify_and_route", "multi_turn_resolution", "policy_conflict_escalation"]
 
@@ -95,13 +92,25 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
             raw = None
             for attempt in range(3):
                 try:
-                    response = client.chat.completions.create(
-                        model=MODEL_NAME,
-                        messages=messages,
-                        max_tokens=500,
-                        temperature=0.0
+                    req_data = {
+                        "model": MODEL_NAME,
+                        "messages": messages,
+                        "max_tokens": 500,
+                        "temperature": 0.0
+                    }
+                    req_url = f"{API_BASE_URL.rstrip('/')}/chat/completions"
+                    headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': f"Bearer {HF_TOKEN}"
+                    }
+                    req = urllib.request.Request(
+                        req_url,
+                        data=json.dumps(req_data).encode('utf-8'),
+                        headers=headers
                     )
-                    raw = response.choices[0].message.content
+                    with urllib.request.urlopen(req, timeout=30) as response:
+                        resp_json = json.loads(response.read().decode('utf-8'))
+                        raw = resp_json['choices'][0]['message']['content']
                     break
                 except Exception as e:
                     if "429" in str(e):
