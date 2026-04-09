@@ -15,15 +15,14 @@ def make_state(task_id, history):
 
 def run_grader(task_id, sequence):
     state = make_state(task_id, [])
-    # We will simulate feeding actions one by one
-    total = 0.0
+    last_score = 0.01
     for act in sequence:
         state["conversation_history"].append({"role": "agent", "action": act})
-        # Evaluate incremental
+        # evaluate_action now returns absolute score (not incremental)
         action_obj = Action(**act)
-        inc, breakdown, done = evaluate_action(task_id, state, action_obj)
-        total += inc
-    return state["absolute_score"]
+        abs_score, breakdown, done = evaluate_action(task_id, state, action_obj)
+        last_score = abs_score
+    return last_score
 
 def test_classify_and_route_perfect():
     seq = [
@@ -32,7 +31,7 @@ def test_classify_and_route_perfect():
         {"action_type": "resolve", "content": "Resolution.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("classify_and_route", seq)
-    assert abs(score - 0.991) < 0.001, f"Expected ~0.991, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected ~0.99, got {score}"
 
 def test_classify_and_route_partial():
     seq = [
@@ -58,7 +57,7 @@ def test_multi_turn_perfect():
         {"action_type": "resolve", "content": "Resolved natively.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("multi_turn_resolution", seq)
-    assert abs(score - 0.991) < 0.001, f"Expected ~0.991, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected ~0.99, got {score}"
 
 def test_multi_turn_partial():
     seq = [
@@ -81,7 +80,7 @@ def test_policy_escalation_perfect():
         {"action_type": "resolve", "content": "We will escalate this comp-9901 ticket. The refund is 50% and timeline is 14 days.", "tool_name": None, "tool_params": None}
     ]
     score = run_grader("policy_conflict_escalation", seq)
-    assert abs(score - 0.991) < 0.001, f"Expected ~0.991, got {score}"
+    assert abs(score - 0.99) < 0.001, f"Expected ~0.99, got {score}"
 
 def test_policy_escalation_partial():
     seq = [

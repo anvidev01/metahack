@@ -1,7 +1,7 @@
 import re
 
 def grade_classify_and_route(state):
-    score = 0.001
+    score = 0.01
     breakdown = {
         "correct_classification": 0.0,
         "correct_routing": 0.0
@@ -30,7 +30,7 @@ def grade_classify_and_route(state):
     return score, breakdown
 
 def grade_multi_turn_resolution(state):
-    score = 0.001
+    score = 0.01
     breakdown = {
         "asked_for_pnr": 0.0,
         "called_tool_correctly": 0.0,
@@ -82,7 +82,7 @@ def grade_multi_turn_resolution(state):
     return score, breakdown
 
 def grade_policy_conflict_escalation(state):
-    score = 0.001
+    score = 0.01
     breakdown = {
         "detected_existing_complaint": 0.0,
         "called_history_tool": 0.0,
@@ -174,7 +174,8 @@ def apply_global_penalties(state, action, reward, breakdown):
 
 def evaluate_action(task_id, state, action):
     # Returns (reward, breakdown, done)
-    # State already includes the current action in conversation_history
+    # reward is the ABSOLUTE score (not incremental), always in (0.01, 0.99)
+    # This ensures /step always returns a value strictly between 0 and 1.
     if task_id == "classify_and_route":
         score, breakdown = grade_classify_and_route(state)
     elif task_id == "multi_turn_resolution":
@@ -182,7 +183,7 @@ def evaluate_action(task_id, state, action):
     elif task_id == "policy_conflict_escalation":
         score, breakdown = grade_policy_conflict_escalation(state)
     else:
-        score, breakdown = 0.0, {}
+        score, breakdown = 0.01, {}
         
     score, breakdown = apply_global_penalties(state, action, score, breakdown)
     
@@ -190,11 +191,11 @@ def evaluate_action(task_id, state, action):
     if action.action_type == "resolve" or state["current_step"] >= state.get("max_steps", 5):
         done = True
         
-    # Cap absolute score
-    score = max(0.001, min(0.999, score))
+    # Cap absolute score strictly within (0, 1) — never exactly 0.0 or 1.0
+    score = max(0.01, min(0.99, score))
     
-    prev_score = state.get("absolute_score", 0.0)
-    incremental = score - prev_score
+    # Store for state tracking (used by inference.py to get final score)
     state["absolute_score"] = score
     
-    return incremental, breakdown, done
+    # Return absolute score (not incremental) so every /step response is in (0.01, 0.99)
+    return score, breakdown, done

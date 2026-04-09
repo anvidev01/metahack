@@ -65,7 +65,7 @@ tool results."""
 def run_task(task_id: str) -> float:
     rewards = []
     steps_taken = 0
-    total_reward = 0.0
+    last_score = 0.01   # absolute score from last step (server now returns absolute not incremental)
     obs = {}
 
     log_start(task_id, "IndiaServiceEnv", MODEL_NAME)
@@ -131,17 +131,17 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
                 timeout=30
             ).json()
             obs = result["observation"]
-            reward = float(result["reward"]["value"])
+            reward = float(result["reward"]["value"])  # absolute score from server
             done = result["done"]
-            breakdown = result["reward"].get("breakdown", {})
         except Exception as e:
             print(f"[DEBUG] Step failed: {e}", file=sys.stderr, flush=True)
-            reward = 0.0
+            reward = last_score   # keep previous score on error
             done = True
-            breakdown = {}
 
+        # Server returns absolute score per step, always in (0.01, 0.99)
+        reward = min(max(reward, 0.01), 0.99)  # safety clamp
         rewards.append(reward)
-        total_reward += reward
+        last_score = reward   # track latest absolute score
         steps_taken = step_num
 
         log_step(
@@ -155,7 +155,8 @@ Step: {obs.get('current_step', 0)}/{obs.get('max_steps', 10)}"""
         if done:
             break
 
-    final_score = min(max(total_reward, 0.01), 0.99)
+    # final_score = last absolute score from server, already in (0.01, 0.99)
+    final_score = min(max(last_score, 0.01), 0.99)
     log_end(
         success=final_score >= 0.1,
         steps=steps_taken,
