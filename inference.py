@@ -137,7 +137,7 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
                 done = result["done"]
             except Exception as e:
                 print(f"[DEBUG] Step failed: {e}", flush=True)
-                reward = 0.0
+                reward = 0.01
                 done = True
             
             total_reward += reward
@@ -150,11 +150,11 @@ Step: {obs['current_step']}/{obs['max_steps']}"""
             log_step(step_num, action_type, reward, done, error=error_val)
             
     finally:
-        score = max(0.0, min(1.0, total_reward))
+        score = max(0.01, min(0.99, total_reward))
         success = score >= 0.1
         log_end(success, step_num, score, rewards_list)
         
-    return total_reward
+    return score
 
 if __name__ == "__main__":
     scores = {}
@@ -163,5 +163,5 @@ if __name__ == "__main__":
             scores[task] = run_task(task)
         except Exception as e:
             print(f"[DEBUG] Task {task} failed: {e}", flush=True)
-            scores[task] = 0.0
+            scores[task] = 0.01
     print(json.dumps({"type": "SUMMARY", "scores": scores}))
