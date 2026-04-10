@@ -1,6 +1,6 @@
 ---
 title: IndiaServiceEnv
-emoji: ☎️
+emoji: 🇮🇳
 colorFrom: yellow
 colorTo: green
 sdk: docker
