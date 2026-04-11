@@ -16,7 +16,10 @@ tags:
 IndiaServiceEnv grew out of a simple frustration — watching 
 people around us struggle to get a Jio billing error corrected, 
 chase an IRCTC refund for weeks, or dispute an electricity bill 
-with no clear path forward. This environment was built by Anvi 
+with no clear path forward. Over 1 billion Indians interact with telecom and 
+utility providers annually — yet most grievance 
+resolution systems remain opaque, slow, and 
+completely inaccessible to the average citizen. This environment was built by Anvi 
 Singh, solo founder of InBridge (inbridge.in), together with 
 teammates Abhishek Rai and Abhyuday Agnihotri, who brought the 
 same energy to this project that goes into building civic tech 
@@ -140,3 +143,35 @@ ENV_URL=http://localhost:7860  # Or point directly to HF URL
 | classify_and_route         | Easy       | 0.50  |
 | multi_turn_resolution      | Medium     | 0.80  |
 | policy_conflict_escalation | Hard       | 0.75  |
+
+## Baseline Interpretation
+
+A random agent scores ~0.1 across all tasks.
+A competent agent scores 0.5–0.8.
+The hard task (policy_conflict_escalation) is 
+designed to challenge even frontier models by 
+requiring multi-step tool use, hidden state 
+discovery, and policy computation in sequence.
+
+## Example Usage
+
+```python
+import requests
+
+BASE_URL = "https://dobie17-indiaserviceenv.hf.space"
+
+# Start a task
+obs = requests.post(f"{BASE_URL}/reset",
+      json={"task_id": "classify_and_route"}).json()
+print(obs["customer_message"])
+
+# Take an action
+result = requests.post(f"{BASE_URL}/step", json={
+    "action_type": "classify",
+    "content": "billing_dispute",
+    "tool_name": None,
+    "tool_params": None
+}).json()
+print(f"Reward: {result['reward']['value']}")
+print(f"Done: {result['done']}")
+```
