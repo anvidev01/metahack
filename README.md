@@ -131,7 +131,6 @@ uvicorn app.main:app --host 0.0.0.0 --port 7860
 ```text
 API_BASE_URL=https://api.groq.com/openai/v1
 MODEL_NAME=llama-3.3-70b-versatile
-HF_TOKEN=<your_groq_api_key_starting_with_gsk_>
 ENV_URL=https://dobie17-indiaserviceenv.hf.space
 ```
 
